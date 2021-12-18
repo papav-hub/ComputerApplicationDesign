@@ -1,5 +1,6 @@
 package com.msa.excercise.controller
 
+import com.msa.excercise.application.CreateExerciseService
 import com.msa.excercise.application.CreateHistoryService
 import com.msa.excercise.application.GetExerciseService
 import com.msa.excercise.application.GetHistoryService
@@ -17,8 +18,10 @@ import javax.validation.Valid
 class ExerciseController(
         @Autowired private val getExerciseService: GetExerciseService,
         @Autowired private val getHistoryService: GetHistoryService,
-        @Autowired private val createHistoryService: CreateHistoryService
+        @Autowired private val createHistoryService: CreateHistoryService,
+        @Autowired private val createExerciseService: CreateExerciseService
 ) {
+
     @GetMapping("/")
     fun getExercises(
             @RequestParam("part") part: ExercisePart,
@@ -26,6 +29,19 @@ class ExerciseController(
         ): ResponseEntity<List<Exercise>> {
         val exercises = getExerciseService.getExercises(part)
         return ResponseEntity(exercises, HttpStatus.OK)
+    }
+
+    /**
+     * 운동 생성 api
+     * @author 김기현
+     * @since 2021-12-1
+     */
+    @PostMapping("/")
+    fun createExercises(
+        @RequestBody @Valid createExerciseReq: ExerciseDto.CreateExerciseReq
+    ): ResponseEntity<Exercise> {
+        val exercise = createExerciseService.createExercise(createExerciseReq)
+        return ResponseEntity(exercise, HttpStatus.OK)
     }
 
     @GetMapping("/{id}")
@@ -44,6 +60,14 @@ class ExerciseController(
         ): ResponseEntity<ExerciseHistory> {
         val history = createHistoryService.createHistory(CreateHistoryReq, username)
         return ResponseEntity(history, HttpStatus.CREATED)
+    }
+
+    @PostMapping("/exercises")
+    fun createExercise( //운동 추가 컨트롤러 구현
+            @RequestBody @Valid createExerciseReq: ExerciseDto.CreateExerciseReq
+    ): ResponseEntity<Exercise> {
+        val exercise = createExerciseService.createExercise(createExerciseReq)
+        return ResponseEntity(exercise, HttpStatus.CREATED)
     }
 
     @GetMapping("/histories")

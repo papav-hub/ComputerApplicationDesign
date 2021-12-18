@@ -41,6 +41,14 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
     implementation("mysql:mysql-connector-java")
     runtimeOnly("com.h2database:h2")
+    //자바 서비스의 상태 정보 수집을 위한 actuator 라이브러리 - 기현
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    // promethus - 기현
+    runtimeOnly("io.micrometer:micrometer-registry-prometheus")
+    //CircuitBreaker - Resilience4J - 기현
+    implementation ("io.github.resilience4j:resilience4j-kotlin:1.7.1")
+    // also have a dependency on the core module(s) needed - for example, retry:
+    implementation ("io.github.resilience4j:resilience4j-retry:1.7.1")
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }

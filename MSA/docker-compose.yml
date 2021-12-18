@@ -1,43 +1,10 @@
 version: '3'
 
 services:
-
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: prometheus
-    user: "root"
-    ports:
-      - 9090:9090
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - /MSA/:/etc/prometheus/
-      - /MSA:/prometheus
-    restart: always
-
-  grafana:
-    image: grafana/grafana:latest
-    container_name: grafana
-    user: "root"
-    ports:
-      - 80:3000
-    volumes:
-      - /MSA:/var/lib/grafana
-      - /MSA/provisioning:/etc/grafana/provisioning
-    links:
-      - prometheus
-    command: grafana-cli plugins install percona-percona-app
-    restart: always
-    depends_on:
-      - prometheus
-
-
-
   mysql:
     image: ce19f003/mysql:5.7
     container_name: mysql-db
     restart: on-failure
-    environment:
-      MYSQL_ROOT_PASSWORD: "dkdltm123"
     ports:
       - 3306:3306
     networks:
@@ -50,7 +17,7 @@ services:
     restart: on-failure
     environment:
       MYSQL_CONNECTION_URI: "jdbc:mysql://mysql:3306/test_db?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&autoReconnection=true"
-      MYSQL_ROOT_PASSWORD: "dkdltm123"
+      MYSQL_ROOT_PASSWORD: "ce19f003"
     ports:
       - 8888:8888
     networks:
@@ -75,12 +42,13 @@ services:
       - config
       - registry
       - mysql
+      - prometheus
     restart: on-failure
     environment:
       CONFIG_SERVER_URI: "http://config:8888"
       EUREKA_SERVER_URI: "http://registry:8761/eureka"
       MYSQL_CONNECTION_URI: "jdbc:mysql://mysql:3306/test_db?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&autoReconnection=true"
-      MYSQL_ROOT_PASSWORD: "dkdltm123"
+      MYSQL_ROOT_PASSWORD: "ce19f003"
     ports:
       - 8080:8080
     networks:
@@ -92,13 +60,14 @@ services:
       - config
       - registry
       - mysql
+      - prometheus
     restart: on-failure
     environment:
       CONFIG_SERVER_URI: "http://config:8888"
       EUREKA_SERVER_URI: "http://registry:8761/eureka"
       MYSQL_CONNECTION_URI: "jdbc:mysql://mysql:3306/test_db?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&autoReconnection=true"
-      MYSQL_ROOT_PASSWORD: "dkdltm123"
-      JWT_SECRET_KEY: "geunyoung_jwt_secret"
+      MYSQL_ROOT_PASSWORD: "ce19f003"
+      JWT_SECRET_KEY: "kimgyun_jwt_secret"
     ports:
       - 8081:8080
     networks:
@@ -110,12 +79,13 @@ services:
       - config
       - registry
       - mysql
+      - prometheus
     restart: on-failure
     environment:
       CONFIG_SERVER_URI: "http://config:8888"
       EUREKA_SERVER_URI: "http://registry:8761/eureka"
       MYSQL_CONNECTION_URI: "jdbc:mysql://mysql:3306/test_db?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&autoReconnection=true"
-      MYSQL_ROOT_PASSWORD: "dkdltm123"
+      MYSQL_ROOT_PASSWORD: "ce19f003"
     ports:
       - 8082:8080
     networks:
@@ -127,12 +97,13 @@ services:
       - config
       - registry
       - mysql
+      - prometheus
     restart: on-failure
     environment:
       CONFIG_SERVER_URI: "http://config:8888"
       EUREKA_SERVER_URI: "http://registry:8761/eureka"
       MYSQL_CONNECTION_URI: "jdbc:mysql://mysql:3306/test_db?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&autoReconnection=true"
-      MYSQL_ROOT_PASSWORD: "dkdltm123"
+      MYSQL_ROOT_PASSWORD: "ce19f003"
     ports:
       - 8083:8080
     networks:
@@ -144,16 +115,53 @@ services:
       - config
       - registry
       - mysql
+      - prometheus
     restart: on-failure
     environment:
       CONFIG_SERVER_URI: "http://config:8888"
       EUREKA_SERVER_URI: "http://registry:8761/eureka"
       MYSQL_CONNECTION_URI: "jdbc:mysql://mysql:3306/test_db?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&autoReconnection=true"
-      MYSQL_ROOT_PASSWORD: "dkdltm123"
+      MYSQL_ROOT_PASSWORD: "ce19f003"
     ports:
       - 8084:8080
     networks:
       - msa-network
+  prometheus:
+    image: prom/prometheus
+    restart: on-failure
+    ports:
+      - 9090:9090
+    networks:
+      - msa-network
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./alert_rules.yml:/etc/prometheus/alert_rules.yml
+  grafana:
+    image: grafana/grafana
+    restart: on-failure
+    ports:
+      - 3000:3000
+    networks:
+      - msa-network
+
+  alertmanager:
+    image: prom/alertmanager
+    user: root
+    ports:
+    - "9093:9093"
+    volumes:
+    - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    networks:
+    - msa-network
+
+
+#  front:
+#    image: ce19f003/front
+#    restart: on-failure
+#    ports:
+#      - 8080:80
+#    networks:
+#      - msa-network
 
 networks:
   msa-network:
