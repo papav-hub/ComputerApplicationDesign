@@ -1,19 +1,14 @@
 #writeBy 최혜민
 global:
-  resolve_timeout: 5m
+  slack_api_url: 'https://hooks.slack.com/services/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'
 
 route:
-  group_by: ['alertname']
-  group_wait: 10s
-  group_interval: 10s
-  repeat_interval: 24h
-  receiver: 'email'
+  receiver: 'slack-notifications'
+  repeat_interval: 2m
 receivers:
-- name: 'email'
-  email_configs:
-  - to: 'pavi03@kpu.ac.kr'
-    from: 'email_id@gmail.com'
-    smarthost: smtp.gmail.com:587
-    auth_username: 'email_id@gmail.com'
-    auth_identity: 'email_id@gmail.com'
-    auth_password: 'password'
+  - name: 'slack-notifications'
+    slack_configs:
+    - channel: '#_monitoring'
+      send_resolved: true
+      title: "{{ range .Alerts }}{{ .Annotations.summary }}\n{{ end }}"
+      text: "{{ range .Alerts }}{{ .Annotations.description }}\n{{ end }}"
